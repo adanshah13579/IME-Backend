@@ -8,8 +8,8 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: { type: String, enum: ["doctor", "user"], required: true },
     profession: { type: String }, // For users
-    specialization: { type: String }, // For doctors
     isVerified: { type: Boolean, default: false },
+    status: { type: String, enum: ["inactive", "active", "inProgress", "completed"], default: "inactive" }, // User's current status
   },
   { timestamps: true }
 );
