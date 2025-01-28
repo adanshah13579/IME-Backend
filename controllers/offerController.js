@@ -2,40 +2,49 @@ import Offer from '../models/Offer.js';
 import User from '../models/userModal.js';
 
 export const createOffer = async (req, res) => {
-    try {
-      const { doctorId, price, schedule, description, estimatedHours } = req.body;
-  
-      // Ensure the doctor exists
-      const doctor = await User.findById(doctorId);
-      if (!doctor || doctor.role !== 'doctor') {
-        return res.status(404).json({ success: false, message: 'Doctor not found' });
-      }
-  
-      // Ensure the user is logged in
-      const userId = req.user.id;  
-  
-      // Create the offer
-      const offer = new Offer({
-        userId,
-        doctorId,
-        price,
-        schedule,
-        description,
-        estimatedHours,
-        status: 'pending', // Default status
-      });
-  
-      await offer.save();
-  
-      return res.status(201).json({
-        success: true,
-        offer,
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: 'Server error' });
+  try {
+    const { doctorId, price, schedule, description, estimatedHours, name, profession } = req.body;
+
+    // Ensure the doctor exists
+    const doctor = await User.findById(doctorId);
+    if (!doctor || doctor.role !== 'doctor') {
+      return res.status(404).json({ success: false, message: 'Doctor not found' });
     }
-  };
+
+    // Ensure the user is logged in
+    const userId = req.user.id;
+
+    // Find the user by userId to check the login status (optional, just in case you want to fetch user details)
+    const user = await User.findById(userId).select('name profession');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Create the offer
+    const offer = new Offer({
+      userId,
+      doctorId,
+      price,
+      schedule,
+      description,
+      estimatedHours,
+      status: 'pending', // Default status
+      name,  // Directly adding the name
+      profession,  // Directly adding the profession
+    });
+
+    await offer.save();
+
+    return res.status(201).json({
+      success: true,
+      offer,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 
 
 export const acceptOffer = async (req, res) => {
@@ -80,46 +89,55 @@ export const acceptOffer = async (req, res) => {
   };
 
 
-export const updateOfferStatus = async (req, res) => {
-  try {
-    const { offerId, status } = req.body;  // The offerId and the new status should be in the request body
-
-    // Find the offer by ID
-    const offer = await Offer.findById(offerId);
-
-    if (!offer) {
-      return res.status(404).json({ success: false, message: "Offer not found" });
-    }
-
-    // Ensure the doctor is the one who created the offer (only doctor can update status)
-    if (offer.doctorId.toString() !== req.user.id) {
-      return res.status(403).json({ success: false, message: "You are not authorized to update this offer" });
-    }
-
-    // Update the offer's status
-    offer.status = status;
-    await offer.save();
-
-    // Optionally, update the user status or other actions based on the offer status change
-    if (status === 'completed') {
-      const user = await User.findById(offer.userId);
-      if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
+  export const updateOfferStatus = async (req, res) => {
+    try {
+      console.log('i am here');
+      
+      const { offerId, status } = req.body; // The offerId and the new status should be in the request body
+  
+      if (!offerId || !status) {
+        return res.status(400).json({ success: false, message: "Offer ID and status are required" });
       }
-      // You could update the user's status or take other actions here
+  
+      // Find the offer by ID
+      const offer = await Offer.findById(offerId);
+  
+      if (!offer) {
+        return res.status(404).json({ success: false, message: "Offer not found" });
+      }
+  
+      // Ensure the doctor is the one who created the offer (only doctor can update status)
+      console.log(offer.doctorId.toString(), req.user.id);
+      
+      if (offer.doctorId.toString() != req.user.id) {
+        return res.status(403).json({ success: false, message: "You are not authorized to update this offer" });
+      }
+  
+      // Update the offer's status
+      offer.status = status;
+  
+      // Save the offer with updated status, but do not require other fields like profession and name
+      const updatedOffer = await offer.save();
+  
+      // Optionally, update the user status or other actions based on the offer status change
+      if (status === "completed") {
+        const user = await User.findById(offer.userId);
+        if (!user) {
+          return res.status(404).json({ success: false, message: "User not found" });
+        }
+        // You could update the user's status or take other actions here
+      }
+  
+      return res.status(200).json({
+        success: true,
+        message: "Offer status updated successfully",
+        offer: updatedOffer,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: "Server error" });
     }
-
-    return res.status(200).json({
-      success: true,
-      message: "Offer status updated successfully",
-      offer,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
+  };
 
 
 export const editOffer = async (req, res) => {
@@ -182,6 +200,29 @@ export const editOffer = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Server error' });
     }
   };
+
+
+  // Fetch all offers
+export const getAllOffers = async (req, res) => {
+  try {
+    // Fetch all offers from the database
+    const offers = await Offer.find();
+
+    // Check if there are any offers
+    if (!offers || offers.length === 0) {
+      return res.status(404).json({ success: false, message: 'No offers found' });
+    }
+
+    // Return the list of all offers
+    return res.status(200).json({
+      success: true,
+      offers,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
 
 
 

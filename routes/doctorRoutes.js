@@ -12,20 +12,13 @@ const upload = multer({ storage: multer.memoryStorage() }); // Store files in me
 // Create Doctor Profile
 router.post(
   "/create-profile",
-  upload.fields([
-    { name: "image", maxCount: 1 },
-    { name: "video", maxCount: 1 },
-  ]),
   createDoctorProfile
 );
 
 // Edit Doctor Profile
 router.put(
   "/edit-profile/:_id",
-  upload.fields([
-    { name: "image", maxCount: 1 },
-    { name: "video", maxCount: 1 },
-  ]),
+ 
   editDoctorProfile
 );
 

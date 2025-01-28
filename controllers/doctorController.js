@@ -1,107 +1,78 @@
 import Doctor from "../models/Doctor.js";
 import { uploadFile } from "../utils/uploadtoServer.js";
 
+
+
+// Controller for creating a doctor's profile
 export const createDoctorProfile = async (req, res) => {
   try {
-    console.log("Received request body:", req.body);
-    console.log("Received files:", req.files);
-
-    const { name, phone, email, aboutMe, location, workStatus, experience, fieldOfStudy, income } = req.body;
-
-    if (!name || !phone || !email || !aboutMe || !location || !workStatus || !experience || !fieldOfStudy || !income) {
-      return res.status(400).json({ success: false, message: "All fields are required." });
-    }
-
-    // Upload profile image and resume video
-    const profileImageUrl = req.files.image ? await uploadFile(req.files.image[0]) : null;
-    const resumeVideoUrl = req.files.video ? await uploadFile(req.files.video[0]) : null;
-
-    console.log("Uploaded profile image URL:", profileImageUrl);
-    console.log("Uploaded resume video URL:", resumeVideoUrl);
-
-    const doctor = new Doctor({
+    const {
       name,
-      phone,
       email,
-      aboutMe,
+      phone,
+      aboutMe,  // Updated to 'aboutMe'
       location,
       workStatus,
       experience,
       fieldOfStudy,
       income,
-    image: profileImageUrl,
-      video: resumeVideoUrl,
+      image,  // Updated to 'image'
+      video,  // Updated to 'video'
+    } = req.body;
+
+    // Create a new doctor profile
+    const newDoctorProfile = new Doctor({
+      name,
+      email,
+      phone,
+      aboutMe,  // Updated to 'aboutMe'
+      location,
+      workStatus,
+      experience,
+      fieldOfStudy,
+      income,
+      image,  // Updated to 'image'
+      video,  // Updated to 'video'
     });
 
-    await doctor.save();
+    // Save the new doctor profile to the database
+    await newDoctorProfile.save();
 
-    res.status(201).json({
-      success: true,
-      message: "Doctor profile created successfully",
-      doctor: {
-        ...doctor.toObject(),
-        profileImage: profileImageUrl,
-        resumeVideo: resumeVideoUrl,
-      },
+    // Respond with success
+    return res.status(201).json({
+      message: 'Doctor profile created successfully',
+      data: newDoctorProfile,
     });
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Error creating doctor profile:', error);
+    return res.status(500).json({ message: 'Error creating doctor profile' });
   }
 };
 
 
 
-
 export const editDoctorProfile = async (req, res) => {
   try {
-    console.log("Received request body:", req.body);
-    console.log("Received files:", req.files);
+    const { doctorId } = req.params;
+    const updatedData = req.body;
 
-    const _id = req.params._id; // Assuming the doctor ID is passed as a route parameter
-    const { name, phone, email, aboutMe, location, workStatus, experience, fieldOfStudy, income } = req.body;
+    // Find the doctor by ID and update their profile
+    const updatedDoctor = await Doctor.findByIdAndUpdate(doctorId, updatedData, {
+      new: true,
+      runValidators: true,
+    });
 
-    if (!_id) {
-      return res.status(400).json({ success: false, message: "Doctor ID is required." });
+    if (!updatedDoctor) {
+      return res.status(404).json({ message: 'Doctor profile not found' });
     }
 
-    // Find the doctor by ID
-    const doctor = await Doctor.findById(_id);
-
-    if (!doctor) {
-      return res.status(404).json({ success: false, message: "Doctor not found." });
-    }
-
-    // Upload new profile image and resume video if provided
-    const profileImageUrl = req.files?.image ? await uploadFile(req.files.image[0]) : doctor.image;
-    const resumeVideoUrl = req.files?.video ? await uploadFile(req.files.video[0]) : doctor.video;
-
-    console.log("Uploaded profile image URL:", profileImageUrl);
-    console.log("Uploaded resume video URL:", resumeVideoUrl);
-
-    // Update doctor fields
-    doctor.name = name || doctor.name;
-    doctor.phone = phone || doctor.phone;
-    doctor.email = email || doctor.email;
-    doctor.aboutMe = aboutMe || doctor.aboutMe;
-    doctor.location = location || doctor.location;
-    doctor.workStatus = workStatus || doctor.workStatus;
-    doctor.experience = experience || doctor.experience;
-    doctor.fieldOfStudy = fieldOfStudy || doctor.fieldOfStudy;
-    doctor.income = income || doctor.income;
-    doctor.image = profileImageUrl;
-    doctor.video = resumeVideoUrl;
-
-    await doctor.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Doctor profile updated successfully",
-      doctor,
+    return res.status(200).json({
+      message: 'Doctor profile updated successfully',
+      data: updatedDoctor,
     });
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Error updating doctor profile:', error);
+    return res.status(500).json({ message: 'Error updating doctor profile' });
   }
 };
 

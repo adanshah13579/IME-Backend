@@ -10,6 +10,8 @@ const offerSchema = new mongoose.Schema(
     estimatedHours: { type: Number, required: true }, // Estimated hours to complete the work
     rating: { type: Number, min: 1, max: 5, default: null }, // Rating from 1 to 5
     review: { type: String, default: null },
+    name: { type: String,  }, // Adding name to Offer schema
+    profession: { type: String, },
     status: { 
       type: String, 
       enum: ["pending", "accepted", "rejected", "inProgress", "completed"], 
