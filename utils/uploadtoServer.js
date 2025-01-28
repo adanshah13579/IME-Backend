@@ -1,8 +1,8 @@
 import fetch from "node-fetch";
 import FormData from "form-data";
 
-const UPLOAD_URL = "https://srv694651.hstgr.cloud/storage/upload";
-const API_KEY = "ayzenn09876@";
+// const UPLOAD_URL = "https://srv694651.hstgr.cloud/storage/upload";
+// const API_KEY = "ayzenn09876@";
 
 // Upload a single file (image or video)
 // Assuming uploadFile handles the upload to your storage service
@@ -25,7 +25,7 @@ const uploadFile = async (file) => {
     const data = await response.json();
   
     if (data && data.fileUrl) {
-      return data.fileUrl; // Assuming the server returns fileUrl
+      return data.fileUrl; 
     }
   
     throw new Error("Failed to get file URL");

@@ -21,7 +21,7 @@ router.post(
 
 // Edit Doctor Profile
 router.put(
-  "/edit-profile/:doctorId",
+  "/edit-profile/:_id",
   upload.fields([
     { name: "image", maxCount: 1 },
     { name: "video", maxCount: 1 },
@@ -30,6 +30,6 @@ router.put(
 );
 
 // Get Doctor Profile
-router.get("/get-profile/:doctorId", getDoctorProfile);
+router.get("/get-profile/:id?", getDoctorProfile);
 
 export default router;

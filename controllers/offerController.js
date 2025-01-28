@@ -183,7 +183,6 @@ export const editOffer = async (req, res) => {
     }
   };
 
-  // offerController.js
 
 
 // API to submit rating and review
@@ -215,3 +214,6 @@ export const submitRating = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
