@@ -76,7 +76,6 @@ export const editDoctorProfile = async (req, res) => {
   }
 };
 
-
 export const getDoctorProfile = async (req, res) => {
   try {
     const { id } = req.params; // Check if an ID is provided in the request params
@@ -96,11 +95,13 @@ export const getDoctorProfile = async (req, res) => {
       });
     } else {
       // Fetch all doctor profiles with pagination if no ID is provided
-      const { page = 1, limit = 2 } = req.query; // Default to page 1 and limit 10
-      const skip = (page - 1) * limit;
+      const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10
+      const currentPage = Math.max(1, Number(page)); // Ensure page is at least 1
+      const pageSize = Math.max(1, Number(limit)); // Ensure limit is at least 1
+      const skip = (currentPage - 1) * pageSize;
 
       const totalProfiles = await Doctor.countDocuments(); // Total number of profiles
-      const doctors = await Doctor.find().skip(skip).limit(Number(limit)).exec();
+      const doctors = await Doctor.find().skip(skip).limit(pageSize).exec();
 
       return res.status(200).json({
         success: true,
@@ -109,9 +110,11 @@ export const getDoctorProfile = async (req, res) => {
           doctors,
           pagination: {
             totalProfiles,
-            currentPage: Number(page),
-            totalPages: Math.ceil(totalProfiles / limit),
-            limit: Number(limit),
+            currentPage,
+            totalPages: Math.ceil(totalProfiles / pageSize),
+            limit: pageSize,
+            hasNextPage: currentPage < Math.ceil(totalProfiles / pageSize),
+            hasPreviousPage: currentPage > 1,
           },
         },
       });

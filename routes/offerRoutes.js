@@ -10,7 +10,7 @@ router.post('/creat-offer', isAuthenticated, createOffer);
 router.put('/accept-offer',isAuthenticated, acceptOffer);
 
 // Update User Status (doctor updates user's status)
-router.put('/update-status',isAuthenticated, updateOfferStatus);
+router.put('/update-status', updateOfferStatus);
 
 // Edit Offer (doctor edits offer details)
 router.put('/edit-offer', isAuthenticated,editOffer);
