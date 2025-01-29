@@ -88,45 +88,34 @@ export const acceptOffer = async (req, res) => {
     }
   };
 
-
   export const updateOfferStatus = async (req, res) => {
     try {
-      console.log('i am here');
-      
-      const { offerId, status } = req.body; // The offerId and the new status should be in the request body
+      console.log("i am here");
+      console.log("req.user:", req.user);  // Add this to debug
   
+      if (!req.user) {
+        return res.status(401).json({ success: false, message: "User not authenticated" });
+      }
+  
+      const { offerId, status } = req.body;
       if (!offerId || !status) {
         return res.status(400).json({ success: false, message: "Offer ID and status are required" });
       }
   
-      // Find the offer by ID
       const offer = await Offer.findById(offerId);
-  
       if (!offer) {
         return res.status(404).json({ success: false, message: "Offer not found" });
       }
   
-      // Ensure the doctor is the one who created the offer (only doctor can update status)
-      console.log(offer.doctorId.toString(), req.user.id);
-      
-      if (offer.doctorId.toString() != req.user.id) {
+      console.log("Doctor ID:", offer.doctorId.toString());
+      console.log("Authenticated User ID:", req.user.id);
+  
+      if (offer.doctorId.toString() !== req.user.id) {
         return res.status(403).json({ success: false, message: "You are not authorized to update this offer" });
       }
   
-      // Update the offer's status
       offer.status = status;
-  
-      // Save the offer with updated status, but do not require other fields like profession and name
       const updatedOffer = await offer.save();
-  
-      // Optionally, update the user status or other actions based on the offer status change
-      if (status === "completed") {
-        const user = await User.findById(offer.userId);
-        if (!user) {
-          return res.status(404).json({ success: false, message: "User not found" });
-        }
-        // You could update the user's status or take other actions here
-      }
   
       return res.status(200).json({
         success: true,
@@ -134,11 +123,11 @@ export const acceptOffer = async (req, res) => {
         offer: updatedOffer,
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: "Server error" });
+      console.error("Error updating offer status:", error);
+      return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
   };
-
+  
 
 export const editOffer = async (req, res) => {
     try {

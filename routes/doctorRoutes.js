@@ -1,17 +1,16 @@
 import express from "express";
-import multer from "multer";
 import {
   createDoctorProfile,
   editDoctorProfile,
   getDoctorProfile,
 } from "../controllers/doctorController.js";
+import { isAuthenticated } from '../middlewares/authmiddleware.js';
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() }); // Store files in memory buffer
 
 // Create Doctor Profile
 router.post(
-  "/create-profile",
+  "/create-profile",isAuthenticated,
   createDoctorProfile
 );
 

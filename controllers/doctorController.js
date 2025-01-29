@@ -1,38 +1,41 @@
 import Doctor from "../models/Doctor.js";
-import { uploadFile } from "../utils/uploadtoServer.js";
 
 
-
-// Controller for creating a doctor's profile
 export const createDoctorProfile = async (req, res) => {
   try {
+    // Ensure the user is authenticated and `req.user` exists
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Unauthorized access" });
+    }
+
     const {
       name,
       email,
       phone,
-      aboutMe,  // Updated to 'aboutMe'
+      aboutMe,
       location,
       workStatus,
       experience,
       fieldOfStudy,
       income,
-      image,  // Updated to 'image'
-      video,  // Updated to 'video'
+      image,
+      video,
     } = req.body;
 
-    // Create a new doctor profile
+    // Create a new doctor profile with userId
     const newDoctorProfile = new Doctor({
+      userId: req.user.id,  // Save the user ID from req.user
       name,
       email,
       phone,
-      aboutMe,  // Updated to 'aboutMe'
+      aboutMe,
       location,
       workStatus,
       experience,
       fieldOfStudy,
       income,
-      image,  // Updated to 'image'
-      video,  // Updated to 'video'
+      image,
+      video,
     });
 
     // Save the new doctor profile to the database
@@ -40,16 +43,14 @@ export const createDoctorProfile = async (req, res) => {
 
     // Respond with success
     return res.status(201).json({
-      message: 'Doctor profile created successfully',
+      message: "Doctor profile created successfully",
       data: newDoctorProfile,
     });
   } catch (error) {
-    console.error('Error creating doctor profile:', error);
-    return res.status(500).json({ message: 'Error creating doctor profile' });
+    console.error("Error creating doctor profile:", error);
+    return res.status(500).json({ message: "Error creating doctor profile" });
   }
 };
-
-
 
 export const editDoctorProfile = async (req, res) => {
   try {

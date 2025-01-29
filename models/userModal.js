@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["doctor", "user"], required: true },
     profession: { type: String }, // For users
     isVerified: { type: Boolean, default: false },
+    
+    image: { type: String, default:'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg' }, // New field for image URL
     status: { type: String, enum: ["inactive", "active", "inProgress", "completed"], default: "inactive" }, // User's current status
   },
   { timestamps: true }
