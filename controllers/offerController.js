@@ -133,15 +133,13 @@ export const editOffer = async (req, res) => {
     try {
       const { offerId, price, schedule, description, estimatedHours } = req.body;
   
-      // Find the offer by ID
       const offer = await Offer.findById(offerId);
   
       if (!offer) {
         return res.status(404).json({ success: false, message: "Offer not found" });
       }
   
-      // Ensure the doctor is the one who created the offer
-      if (offer.doctorId.toString() !== req.user.id) {
+      if (offer.doctorId !== req.user.id) {
         return res.status(403).json({ success: false, message: "You are not authorized to edit this offer" });
       }
   
@@ -169,17 +167,17 @@ export const editOffer = async (req, res) => {
 
   export const getOffer = async (req, res) => {
     try {
-      const offerId = req.params.offerId; // Get the offer ID from the URL parameter
+      const offerId = req.params.offerId; 
   
-      // Find the offer by its ID
+      
       const offer = await Offer.findById(offerId);
   
-      // Check if the offer exists
+      
       if (!offer) {
         return res.status(404).json({ success: false, message: 'Offer not found' });
       }
   
-      // Return the offer data
+      
       return res.status(200).json({
         success: true,
         offer,
@@ -191,18 +189,14 @@ export const editOffer = async (req, res) => {
   };
 
 
-  // Fetch all offers
 export const getAllOffers = async (req, res) => {
   try {
-    // Fetch all offers from the database
     const offers = await Offer.find();
 
-    // Check if there are any offers
     if (!offers || offers.length === 0) {
       return res.status(404).json({ success: false, message: 'No offers found' });
     }
 
-    // Return the list of all offers
     return res.status(200).json({
       success: true,
       offers,

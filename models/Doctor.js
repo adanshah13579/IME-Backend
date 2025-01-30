@@ -13,6 +13,8 @@ const doctorSchema = new mongoose.Schema(
     fieldOfStudy: { type: String, required: true },
     income: { type: String, required: true },
     image: { type: String, default:'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg' }, // New field for image URL
+    file: { type: String },  // New field for file URL (e.g., CV or document)
+
     video: { type: String },  // New field for video URL
     offers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Offer" }], 
     

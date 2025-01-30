@@ -3,6 +3,7 @@ import {
   createDoctorProfile,
   editDoctorProfile,
   getDoctorProfile,
+  getProfile,
 } from "../controllers/doctorController.js";
 import { isAuthenticated } from '../middlewares/authmiddleware.js';
 
@@ -21,7 +22,11 @@ router.put(
   editDoctorProfile
 );
 
-// Get Doctor Profile
-router.get("/get-profile/:id?", getDoctorProfile);
+//for doctor
+router.get("/getprofile/:userId", getProfile);
+
+
+// Get Doctor Profile for user
+router.get("/get-profile/", getDoctorProfile);
 
 export default router;

@@ -47,6 +47,60 @@ export const login = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+export const doctorLogin = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Find the user (doctor) with the provided email
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Check if the user's role is "doctor"
+    if (user.role !== "doctor") {
+      return res.status(403).json({ message: "Access denied: User is not a doctor" });
+    }
+
+    // Check if the password matches
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+
+    // Generate the token with the user's ID and role
+    const token = generateToken(user._id, user.role);
+
+    // Return the user (doctor) data along with the token
+    res.json({
+      token,
+      doctor: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        password: user.password, // Again, avoid sending the password in the response
+        role: user.role,
+        specialization: user.specialization,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        image: user.image,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export const logoutDoctor = (req, res) => {
+  try {
+    // Clear the token from the response header (if using cookies)
+    res.clearCookie('token');  // Optional, if you're storing the token in cookies
+
+    // Send a response confirming that the user has been logged out
+    return res.status(200).json({ message: "Logged out successfully." });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    return res.status(500).json({ message: "An error occurred during logout." });
+  }
+};
+
+
 
 // Forgot Password
 export const forgotPassword = async (req, res) => {
