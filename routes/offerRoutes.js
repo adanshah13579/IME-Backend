@@ -1,5 +1,5 @@
 import express from 'express';
-import { createOffer, acceptOffer, updateOfferStatus, editOffer, getOffer, submitRating, getAllOffers,  } from '../controllers/offerController.js';
+import { createOffer, acceptOffer, updateOfferStatus, editOffer, getOffer, submitRating,  getOffers,  } from '../controllers/offerController.js';
 import { isAuthenticated } from '../middlewares/authmiddleware.js';
 
 const router = express.Router();
@@ -10,14 +10,14 @@ router.post('/creat-offer', isAuthenticated, createOffer);
 router.put('/accept-offer',isAuthenticated, acceptOffer);
 
 // Update User Status (doctor updates user's status)
-router.put('/update-status', updateOfferStatus);
 
 // Edit Offer (doctor edits offer details)
 router.put('/edit-offer', isAuthenticated,editOffer);
 
 router.get('/get-offer/:offerId', getOffer);
 
-router.get('/get-all-offers', getAllOffers);
+router.get("/doctor-offers", isAuthenticated, getOffers);
+router.put("/update-status", isAuthenticated, updateOfferStatus);
 
 
 router.put("/submit-rating/:offerId", isAuthenticated, submitRating);
