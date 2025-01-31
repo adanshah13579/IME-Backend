@@ -1,9 +1,10 @@
 import express from "express";
 import {
   createDoctorProfile,
-  editDoctorProfile,
+  
   getDoctorProfile,
   getProfile,
+  updateDoctorProfile,
 } from "../controllers/doctorController.js";
 import { isAuthenticated } from '../middlewares/authmiddleware.js';
 
@@ -15,18 +16,14 @@ router.post(
   createDoctorProfile
 );
 
-// Edit Doctor Profile
-router.put(
-  "/edit-profile/:_id",
- 
-  editDoctorProfile
-);
+router.put("/updateprofile/:userId", isAuthenticated, updateDoctorProfile);
+
 
 //for doctor
-router.get("/getprofile/:userId", getProfile);
+router.get("/getprofile/:userId", getDoctorProfile);
 
 
 // Get Doctor Profile for user
-router.get("/get-profile/", getDoctorProfile);
+router.get("/get-profile/", getProfile);
 
 export default router;

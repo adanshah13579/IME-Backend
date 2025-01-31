@@ -9,23 +9,16 @@ export const createDoctorProfile = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized access" });
     }
 
-    // Check if the authenticated user is a doctor
     if (req.user.role !== "doctor") {
       return res
         .status(403)
         .json({ message: "Access denied. Only doctors can create profiles." });
     }
-
-    // Check if the doctor already has a profile
     const existingProfile = await Doctor.findOne({ userId: req.user.id });
     if (existingProfile) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Doctor profile already exists. You cannot create another one.",
-        });
+      return res.status(400).json({ message: "Profile already exists. You can update your profile." });
     }
+    
 
     const {
       name,
@@ -42,9 +35,8 @@ export const createDoctorProfile = async (req, res) => {
       file,
     } = req.body;
 
-    // Create a new doctor profile with the authenticated doctor’s ID
     const newDoctorProfile = new Doctor({
-      userId: req.user.id, // This ensures only a doctor’s ID is saved
+      userId: req.user.id, 
       name,
       email,
       phone,
@@ -59,7 +51,6 @@ export const createDoctorProfile = async (req, res) => {
       file,
     });
 
-    // Save the doctor profile to the database
     await newDoctorProfile.save();
 
     return res.status(201).json({
@@ -72,76 +63,77 @@ export const createDoctorProfile = async (req, res) => {
   }
 };
 
-export const getProfile = async (req, res) => {
+export const updateDoctorProfile = async (req, res) => {
+  const { userId } = req.params; // Get userId from the URL parameter
+  const { name, email, phone, aboutMe, location, workStatus, experience, fieldOfStudy, income, image, video, file } = req.body;
+
   try {
-   
-    
-    const { userId } = req.params;
-    console.log(userId);
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
+    // Find the doctor by their userId
+    const doctor = await Doctor.findOne({ userId });
+
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
     }
 
-    const doctorProfile = await Doctor.findOne({ userId });
+    // Optionally, validate the profile data
+    // If you're using a validator, like Joi or a custom one
+    // const { error } = validateProfileData(req.body);
+    // if (error) return res.status(400).json({ message: error.details[0].message });
 
-    if (!doctorProfile) {
-      return res.status(404).json({ message: "Doctor profile not found" });
-    }
+    // Update the doctor's profile fields
+    doctor.name = name || doctor.name;
+    doctor.email = email || doctor.email;
+    doctor.phone = phone || doctor.phone;
+    doctor.aboutMe = aboutMe || doctor.aboutMe;
+    doctor.location = location || doctor.location;
+    doctor.workStatus = workStatus || doctor.workStatus;
+    doctor.experience = experience || doctor.experience;
+    doctor.fieldOfStudy = fieldOfStudy || doctor.fieldOfStudy;
+    doctor.income = income || doctor.income;
+    doctor.image = image || doctor.image; // Assuming image URL is passed
+    doctor.video = video || doctor.video;
+    doctor.file = file || doctor.file;
 
-    return res.status(200).json(doctorProfile);
-  } catch (error) {
-    console.error("Error fetching doctor profile:", error);
-    return res.status(500).json({ message: "Error fetching doctor profile" });
-  }
-};
-
-export const editDoctorProfile = async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    
-
-    if (req.user.id !== userId) {
-      return res
-        .status(403)
-        .json({
-          message: "Access denied. You can only edit your own profile.",
-        });
-    }
-
-    // Find the existing profile
-    const doctorProfile = await Doctor.findOne({ userId });
-
-    if (!doctorProfile) {
-      return res.status(404).json({ message: "Doctor profile not found" });
-    }
-
-    // Extract updated fields from the request body
-    const updates = req.body;
-
-    // Update only provided fields
-    Object.keys(updates).forEach((key) => {
-      if (updates[key] !== undefined) {
-        doctorProfile[key] = updates[key];
-      }
-    });
-
-    // Save the updated profile
-    await doctorProfile.save();
+    // Save the updated doctor profile
+    await doctor.save();
 
     return res.status(200).json({
-      message: "Doctor profile updated successfully",
-      data: doctorProfile,
+      message: 'Profile updated successfully',
+      profile: doctor,
     });
   } catch (error) {
-    console.error("Error updating doctor profile:", error);
-    return res.status(500).json({ message: "Error updating doctor profile" });
+    console.error("Error updating profile:", error);
+    return res.status(500).json({ message: 'Server error, please try again later.' });
   }
 };
 
+
+
+
 export const getDoctorProfile = async (req, res) => {
+  const { userId } = req.params; // Ensure this is correctly receiving the ID
+
+  console.log("userId", userId);
+  
+
   try {
-    const { id } = req.params; // Check if an ID is provided in the request params
+    const profile = await Doctor.findOne({ userId }); // Adjust this based on your model and schema
+    
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+    
+    return res.status(200).json(profile);
+  } catch (err) {
+    console.error("Error fetching doctor profile:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const getProfile = async (req, res) => {
+  try {
+    const { id } = req.params; 
      
     if (id) {
       // Fetch a specific doctor profile by ID
