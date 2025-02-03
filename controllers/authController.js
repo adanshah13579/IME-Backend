@@ -57,12 +57,15 @@ export const doctorLogin = async (req, res) => {
 
     // Check if the user's role is "doctor"
     if (user.role !== "doctor") {
-      return res.status(403).json({ message: "Access denied: User is not a doctor" });
+      return res
+        .status(403)
+        .json({ message: "Access denied: User is not a doctor" });
     }
 
     // Check if the password matches
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     // Generate the token with the user's ID and role
     const token = generateToken(user._id, user.role);
@@ -90,17 +93,17 @@ export const doctorLogin = async (req, res) => {
 export const logoutDoctor = (req, res) => {
   try {
     // Clear the token from the response header (if using cookies)
-    res.clearCookie('token');  // Optional, if you're storing the token in cookies
+    res.clearCookie("token"); // Optional, if you're storing the token in cookies
 
     // Send a response confirming that the user has been logged out
     return res.status(200).json({ message: "Logged out successfully." });
   } catch (error) {
     console.error("Error during logout:", error);
-    return res.status(500).json({ message: "An error occurred during logout." });
+    return res
+      .status(500)
+      .json({ message: "An error occurred during logout." });
   }
 };
-
-
 
 // Forgot Password
 export const forgotPassword = async (req, res) => {

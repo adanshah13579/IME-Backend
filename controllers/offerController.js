@@ -4,7 +4,7 @@ import User from "../models/userModal.js";
 export const createOffer = async (req, res) => {
   try {
     const {
-      doctorId,
+      userId,
       price,
       schedule,
       description,
@@ -13,18 +13,16 @@ export const createOffer = async (req, res) => {
       profession,
     } = req.body;
 
-    // Ensure the doctor exists
-    const doctor = await User.findById(doctorId);
-    if (!doctor || doctor.role !== "doctor") {
+    const Usser = await User.findById(userId);
+    if (!Usser || Usser.role !== "user") {
       return res
         .status(404)
-        .json({ success: false, message: "Doctor not found" });
+        .json({ success: false, message: "user not found" });
     }
 
     // Ensure the user is logged in
-    const userId = req.user.id;
+    const doctorId = req.user.id;
 
-    // Find the user by userId to check the login status (optional, just in case you want to fetch user details)
     const user = await User.findById(userId).select("name profession");
     if (!user) {
       return res
@@ -40,9 +38,9 @@ export const createOffer = async (req, res) => {
       schedule,
       description,
       estimatedHours,
-      status: "pending", // Default status
-      name, // Directly adding the name
-      profession, // Directly adding the profession
+      status: "Active",
+      name,
+      profession,
     });
 
     await offer.save();
@@ -124,13 +122,11 @@ export const editOffer = async (req, res) => {
       });
     }
 
-    // Update the offer with new details
-    offer.price = price || offer.price; // If price is provided, update, otherwise keep the existing one
+    offer.price = price || offer.price;
     offer.schedule = schedule || offer.schedule;
     offer.description = description || offer.description;
     offer.estimatedHours = estimatedHours || offer.estimatedHours;
 
-    // Save the updated offer
     await offer.save();
 
     return res.status(200).json({
@@ -178,26 +174,32 @@ export const getOffers = async (req, res) => {
 };
 
 export const updateOfferStatus = async (req, res) => {
-  try {
-    const { _id, status } = req.body;
-    const offer = await Offer.findById(_id);
+  const { _id, status } = req.body;
 
+  try {
+    // Check if the offer exists
+    const offer = await Offer.findById(_id);
     if (!offer) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Offer not found" });
+      return res.status(404).json({ message: "Offer not found" });
     }
 
+    // Update the status
     offer.status = status;
+
+    // Save the updated offer
     await offer.save();
 
-    res.json({ success: true, message: "Offer status updated successfully" });
+    // Respond with the updated offer
+    return res.status(200).json({
+      message: "Offer status updated successfully",
+      updatedOffer: offer,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Error updating offer status" });
+    console.error("Error updating offer status:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
+
 // API to submit rating and review
 export const submitRating = async (req, res) => {
   try {
