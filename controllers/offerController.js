@@ -144,6 +144,9 @@ export const getOffer = async (req, res) => {
   try {
     const offerId = req.params.offerId;
 
+    console.log("offerid",offerId);
+    
+
     const offer = await Offer.findById(offerId);
 
     if (!offer) {
