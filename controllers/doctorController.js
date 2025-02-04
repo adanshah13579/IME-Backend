@@ -1,4 +1,6 @@
 import Doctor from "../models/Doctor.js";
+import mongoose from "mongoose";
+
 
 export const createDoctorProfile = async (req, res) => {
   try {
@@ -180,32 +182,68 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// ✅ Search doctors by query
 export const searchDoctors = async (req, res) => {
-  try {
-    const { query, budget, location } = req.query;
-    let filter = {};
+  const { searchQuery, budget, location } = req.query;
 
-    if (query) {
-      filter.$or = [
-        { name: { $regex: query, $options: "i" } },
-        { fieldOfStudy: { $regex: query, $options: "i" } },
+  try {
+    // Initialize an empty query object
+    const query = {};
+
+    // If searchQuery exists, filter by name or fieldOfStudy
+    if (searchQuery) {
+      query.$or = [
+        { name: { $regex: searchQuery, $options: "i" } },  // Case-insensitive search for name
+        { fieldOfStudy: { $regex: searchQuery, $options: "i" } }, // Case-insensitive search for field of study
       ];
     }
 
+    // If budget exists, filter by income (assuming it's a numerical field for doctor fees)
     if (budget) {
-      filter.income = { $lte: parseInt(budget) };
+      query.income = { $lte: parseInt(budget, 10) };  // Filter doctors with income <= the selected budget
     }
 
+    // If location exists, filter by location (postcode or area)
     if (location) {
-      filter.location = { $regex: location, $options: "i" };
+      query.location = location;
     }
 
-    const doctors = await Doctor.find(filter);
-    res.json(doctors);
+    // Query the database to find doctors matching the search criteria
+    const doctors = await Doctor.find(query);
+
+    // Return the list of doctors or an empty array if none are found
+    res.status(200).json({
+      success: true,
+      data: doctors,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Search failed" });
+    console.error("Error while searching for doctors:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch doctors.",
+    });
   }
 };
+
+
+// export const getDoctorforUser = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     // Validate ObjectId
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//       return res.status(400).json({ message: "Invalid User ID format" });
+//     }
+
+//     // Find doctor by userId
+//     const doctor = await Doctor.findOne({ userId: id }).select("name phone email aboutMe location workStatus experience fieldOfStudy income image");
+
+//     if (!doctor) {
+//       return res.status(404).json({ message: "Doctor not found" });
+//     }
+
+//     res.status(200).json(doctor);
+//   } catch (error) {
+//     console.error("Error fetching doctor:", error);
+//     res.status(500).json({ message: "Server Error" });
+//   }
+// };

@@ -22,9 +22,9 @@ const offerSchema = new mongoose.Schema(
     profession: { type: String },
     status: {
       type: String,
-      enum: ["Active", "Completed", "Accepted", "Cancelled"],
+      enum: ["Active", "Completed", "Accepted", "Cancelled", "Rejected", ],
       default: "Active",
-    }, // Status of the offer
+    }, 
   },
   { timestamps: true }
 );
