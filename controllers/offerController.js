@@ -287,13 +287,13 @@ export const updateOfferStatus = async (req, res) => {
   }
 };
 
-// API to submit rating and review
 export const submitRating = async (req, res) => {
   try {
     const { offerId } = req.params;
     const { rating, review } = req.body;
 
-    // Check if the offer exists
+    console.log(req.body);
+    
     const offer = await Offer.findById(offerId);
 
     if (!offer) {
@@ -302,14 +302,12 @@ export const submitRating = async (req, res) => {
         .json({ success: false, message: "Offer not found" });
     }
 
-    // Ensure the offer is completed before submitting a rating
-    if (offer.status !== "completed") {
+    if (offer.status !== "Completed") {
       return res
         .status(400)
         .json({ success: false, message: "Offer must be completed to rate" });
     }
 
-    // Update the offer with rating and review
     offer.rating = rating;
     offer.review = review;
 

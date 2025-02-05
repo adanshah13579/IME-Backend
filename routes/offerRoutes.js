@@ -21,7 +21,7 @@ router.get("/doctor-offers", isAuthenticated, getOffers);
 router.put("/update-status", isAuthenticated, updateOfferStatus);
 
 
-router.put("/submit-rating/:offerId", isAuthenticated, submitRating);
+router.put("/submit-rating/:offerId",  submitRating);
 
 
 

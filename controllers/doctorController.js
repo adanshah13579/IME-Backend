@@ -225,25 +225,25 @@ export const searchDoctors = async (req, res) => {
 };
 
 
-// export const getDoctorforUser = async (req, res) => {
-//   try {
-//     const { id } = req.params;
+export const getDoctorforUser = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-//     // Validate ObjectId
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//       return res.status(400).json({ message: "Invalid User ID format" });
-//     }
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid User ID format" });
+    }
 
-//     // Find doctor by userId
-//     const doctor = await Doctor.findOne({ userId: id }).select("name phone email aboutMe location workStatus experience fieldOfStudy income image");
+    // Find doctor by userId
+    const doctor = await Doctor.findOne({ userId: id }).select("name phone email aboutMe location workStatus experience fieldOfStudy income image");
 
-//     if (!doctor) {
-//       return res.status(404).json({ message: "Doctor not found" });
-//     }
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
 
-//     res.status(200).json(doctor);
-//   } catch (error) {
-//     console.error("Error fetching doctor:", error);
-//     res.status(500).json({ message: "Server Error" });
-//   }
-// };
+    res.status(200).json(doctor);
+  } catch (error) {
+    console.error("Error fetching doctor:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
